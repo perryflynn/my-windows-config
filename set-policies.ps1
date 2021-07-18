@@ -165,8 +165,12 @@ else
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsUpdate::AutoUpdateCfg
 Write-Host "[*] Disable automatic updates, show notifications on new updates"
 @(
-    New-Object psobject -Property @{ ValueName='NoAutoUpdate'; Data = 0; Type = 'DWord' }
-    New-Object psobject -Property @{ ValueName='AUOptions'; Data = 2; Type = 'DWord' }
+    # auto updates (yes 1 means do updates)
+    New-Object psobject -Property @{ ValueName='NoAutoUpdate'; Data = 1; Type = 'DWord' }
+    # download and install
+    New-Object psobject -Property @{ ValueName='AUOptions'; Data = 4; Type = 'DWord' }
+    # no automatic reboot
+    New-Object psobject -Property @{ ValueName='NoAutoRebootWithLoggedOnUsers'; Data = 1; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
 
 # Error Reporting
