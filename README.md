@@ -1,7 +1,18 @@
 # my-windows-config
 Disable Cortana, forced updates and other annoying stuff
 
-*PS C:\WINDOWS\system32>* `\configs\set-policies.ps1`
+## Install
+
+```ps1
+new-item -itemtype directory -force -path \configs
+Invoke-WebRequest -Uri "https://github.com/perryflynn/my-windows-config/raw/main/set-policies.ps1" -OutFile "\configs\set-policies.ps1"
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+\configs\set-policies.ps1
+```
+
+## Example output
+
+**PS C:\WINDOWS\system32>** `\configs\set-policies.ps1`
 
 ```
 [i] PolicyFileEditor cmdlet already installed
