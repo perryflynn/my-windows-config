@@ -1,6 +1,6 @@
 # Disable annoying stuff in Windows 10 with group policies
 # by Christian Blechert <christian@serverless.industries>
-# 2021-07-14
+# 2021-07-18
 
 $ErrorActionPreference = "Stop"
 
@@ -163,12 +163,17 @@ else
 
 # Windows Updates
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsUpdate::AutoUpdateCfg
+# https://docs.microsoft.com/de-de/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry
 Write-Host "[*] Disable automatic updates, show notifications on new updates"
 @(
-    # auto updates (yes 1 means do updates)
-    New-Object psobject -Property @{ ValueName='NoAutoUpdate'; Data = 1; Type = 'DWord' }
+    # auto updates
+    New-Object psobject -Property @{ ValueName='NoAutoUpdate'; Data = 0; Type = 'DWord' }
     # download and install
     New-Object psobject -Property @{ ValueName='AUOptions'; Data = 4; Type = 'DWord' }
+    # every day
+    New-Object psobject -Property @{ ValueName='ScheduledInstallDay'; Data = 0; Type = 'DWord' }
+    # install at 4 am
+    New-Object psobject -Property @{ ValueName='ScheduledInstallTime'; Data = 4; Type = 'DWord' }
     # no automatic reboot
     New-Object psobject -Property @{ ValueName='NoAutoRebootWithLoggedOnUsers'; Data = 1; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
