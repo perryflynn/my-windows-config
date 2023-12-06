@@ -5,15 +5,15 @@
 $ErrorActionPreference = "Stop"
 
 # Install required powershell modules
-if (-not (Get-Command "Set-PolicyFileEntry" -errorAction SilentlyContinue)) 
+if (-not (Get-Command "Set-PolicyFileEntry" -errorAction SilentlyContinue))
 {
     Write-Host "[*] PolicyFileEditor cmdlet not found, install it..."
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
     Install-Module -Name PolicyFileEditor -RequiredVersion 3.0.0 -Scope CurrentUser
 }
-else 
+else
 {
-    Write-Host "[i] PolicyFileEditor cmdlet already installed"    
+    Write-Host "[i] PolicyFileEditor cmdlet already installed"
 }
 
 # Policy File
@@ -41,25 +41,6 @@ Write-Host "[*] Disable online tips"
 @(
     New-Object psobject -Property @{ ValueName='AllowOnlineTips'; Data = 0; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-
-# Start menu
-# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.StartMenu::LockedStartLayout
-if (Test-Path -Path "C:\configs\startlayout.xml" -PathType Leaf) 
-{
-    Write-Host "[*] Use C:\configs\startlayout.xml as start menu layout"
-    @(
-        New-Object psobject -Property @{ ValueName='LockedStartLayout'; Data = 1; Type = 'DWord' }
-        New-Object psobject -Property @{ ValueName='StartLayoutFile'; Data = "C:\configs\startlayout.xml"; Type = 'ExpandString' }
-    ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\Explorer"
-}
-else 
-{
-    Write-Host "[i] Skip start menu layout stuff as there is no startlayout.xml present."
-    @(
-        New-Object psobject -Property @{ ValueName='LockedStartLayout' }
-        New-Object psobject -Property @{ ValueName='StartLayoutFile' }
-    ) | Remove-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\Explorer"
-}
 
 # cloud content
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.CloudContent::DisableSoftLanding
@@ -103,7 +84,7 @@ Write-Host "[*] Disable Microsoft accounts"
 
 # Microsoft Edge
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.MicrosoftEdge::AllowFlash
-Write-Host "[*] COnfigure the new MS Edge (Chromium)"
+Write-Host "[*] Configure the new MS Edge (Chromium)"
 @(
     New-Object psobject -Property @{ ValueName='FlashPlayerEnabled'; Data = 0; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\MicrosoftEdge\Addons"
@@ -125,16 +106,20 @@ Write-Host "[*] Disable Windows feeds"
 
 # Windows Search
 # https://admx.help/?Category=Windows_10_2016&Policy=FullArmor.Policies.3B9EA2B5_A1D1_4CD5_9EDE_75B22990BC21::AllowCloudSearch
-Write-Host "[*] Disable cortana and cloud functions in windows search"
+Write-Host "[*] Disable cortana, web search and cloud functions in windows search"
 @(
     New-Object psobject -Property @{ ValueName='AllowCloudSearch'; Data = 0; Type = 'DWord' }
     New-Object psobject -Property @{ ValueName='AllowCortanaAboveLock'; Data = 0; Type = 'DWord' }
     New-Object psobject -Property @{ ValueName='AllowCortana'; Data = 0; Type = 'DWord' }
     New-Object psobject -Property @{ ValueName='AllowCortanaInAAD'; Data = 0; Type = 'DWord' }
     New-Object psobject -Property @{ ValueName='AllowSearchToUseLocation'; Data = 0; Type = 'DWord' }
-    New-Object psobject -Property @{ ValueName='AllowCloudSearch'; Data = 0; Type = 'DWord' }
-    New-Object psobject -Property @{ ValueName='AllowCloudSearch'; Data = 0; Type = 'DWord' }
+    New-Object psobject -Property @{ ValueName='DisableWebSearch'; Data = 1; Type = 'DWord' }
+    New-Object psobject -Property @{ ValueName='ConnectedSearchUseWeb'; Data = 0; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\Windows Search"
+
+@(
+    New-Object psobject -Property @{ ValueName='DisableSearchBoxSuggestions'; Data = 1; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\Explorer"
 
 # Sync
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.SettingSync::DisableSettingSync
@@ -153,9 +138,9 @@ if (Test-Path -Path "C:\configs\enable-logoninfo.txt" -PathType Leaf)
         New-Object psobject -Property @{ ValueName='DisplayLastLogonInfo'; Data = 1; Type = 'DWord' }
     ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Microsoft\Windows\CurrentVersion\Policies\System"
 }
-else 
+else
 {
-    Write-Host "[i] 'Show logoninfo' is disabled. Create a empty 'C:\config\enable-logoninfo.txt' to enable."
+    Write-Host "[i] 'Show logoninfo' is disabled. Create a empty 'C:\configs\enable-logoninfo.txt' to enable."
     @(
         New-Object psobject -Property @{ ValueName='DisplayLastLogonInfo' }
     ) | Remove-PolicyFileEntry -Path $UserDir -Key "Software\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -177,6 +162,14 @@ Write-Host "[*] Disable automatic updates, show notifications on new updates"
     # no automatic reboot
     New-Object psobject -Property @{ ValueName='NoAutoRebootWithLoggedOnUsers'; Data = 1; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate\AU"
+
+# https://www.pcmag.com/how-to/stop-your-computer-from-randomly-waking-up-from-sleep-mode
+# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsUpdate::AUPowerManagement_Title
+Write-Host "[*] Disable wake up system for windows updates"
+@(
+    # no wake up for updates
+    New-Object psobject -Property @{ ValueName='AUPowerManagement'; Data = 0; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate"
 
 # Error Reporting
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsErrorReporting::WerDisable_2
@@ -211,10 +204,131 @@ Write-Host "[*] Disable application telemetry"
     New-Object psobject -Property @{ ValueName='AITEnable'; Data = 0; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\AppCompat"
 
+# Wifi
+# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WlanSvc::WiFiSense
+Write-Host "[*] Disable auto connect to suggested hotspots"
+@(
+    # "Connect to suggested open hotspots," "Connect to networks shared by my contacts," and "Enable paid services"
+    New-Object psobject -Property @{ ValueName='AutoConnectAllowedOEM'; Data = 0; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Microsoft\wcmsvc\wifinetworkmanager\config"
+
+# Disable alternative windows update sources
+# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.DeliveryOptimization::DownloadMode
+Write-Host "[*] Disable P2P Windows Update features"
+@(
+    # Bypass P2P and use BITS service
+    New-Object psobject -Property @{ ValueName='DODownloadMode'; Data = 100; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization"
+
+# Disable OneDrive
+# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.OneDrive::PreventOnedriveFileSync
+Write-Host "[*] Disable OneDrive"
+@(
+    # Bypass P2P and use BITS service
+    New-Object psobject -Property @{ ValueName='DisableFileSyncNGSC'; Data = 1; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\OneDrive"
+
+# True reboot/shutdown
+if (Test-Path -Path "C:\configs\enable-trueshutdown-icon.txt" -PathType Leaf)
+{
+    Write-Host "[*] Create shortcut for true reboot/shutdown on desktop"
+
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\True Reboot.lnk")
+    $Shortcut.TargetPath = "shutdown"
+    $Shortcut.Arguments = "/r /f /t 0"
+    $Shortcut.IconLocation = "C:\Windows\System32\shell32.dll, 41"
+    $Shortcut.Save()
+
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\True Shutdown.lnk")
+    $Shortcut.TargetPath = "shutdown"
+    $Shortcut.Arguments = "/s /f /t 0"
+    $Shortcut.IconLocation = "C:\Windows\System32\shell32.dll, 41"
+    $Shortcut.Save()
+}
+else
+{
+    Write-Host "[i] True shutdown/reboot icons are disabled. Create a empty 'C:\configs\enable-trueshutdown-icon.txt' to enable."
+    Remove-Item -Force -ErrorAction SilentlyContinue -Path "C:\Users\Public\Desktop\True Reboot.lnk"
+    Remove-Item -Force -ErrorAction SilentlyContinue -Path "C:\Users\Public\Desktop\True Shutdown.lnk"
+}
+
+# uninstall bloatware software
+function Remove-AppxPackageAndWait {
+    param([string]$Name)
+
+    $pkginfos = Get-AppxPackage -AllUsers -Name "*$($Name)*"
+    foreach($pkginfo in $pkginfos)
+    {
+        Write-Host "[*] Uninstall package '$($pkginfo.PackageFullName)' on all accounts"
+        $pkginfo | Remove-AppxPackage -AllUsers
+    }
+}
+
+function Remove-AppXProvisionedPackageAndWait {
+    param([string]$Name)
+
+    $pkginfos = Get-AppXProvisionedPackage -Online | Where-Object { $_.DisplayName -like "*$($Name)*" }
+    foreach($pkginfo in $pkginfos)
+    {
+        Write-Host "[*] Uninstall '$($pkginfo.PackageName)' on system-level"
+        Remove-AppxProvisionedPackage -Online -AllUsers -PackageName "$($pkginfo.PackageName)"
+    }
+}
+
+$packages = @(
+    '3dbuilder',
+    '3dviewer',
+    'bingfinance',
+    'bingnews',
+    'bingsports',
+    'bingweather',
+    'disney',
+    'feedbackhub',
+    'getstarted',
+    'netflix',
+    'officehub',
+    'oneconnect',
+    'onenote',
+    'people',
+    'print3d',
+    'skypeapp',
+    'solitairecollection',
+    'soundrecorder',
+    'tuneinradio',
+    'twitter',
+    'windowsalarms',
+    'windowscamera',
+    'windowscommunicationsapps',
+    'windowsmaps',
+    'windowsphone',
+    'xbox',
+    'zunemusic',
+    'zunevideo'
+)
+
+if (Test-Path -Path "C:\configs\enable-uninstallpackages.txt" -PathType Leaf)
+{
+    $ErrorActionPreference = "Continue"
+
+    foreach($package in $packages)
+    {
+        Remove-AppXProvisionedPackageAndWait -Name $package
+        Remove-AppxPackageAndWait -Name $package
+    }
+
+    $ErrorActionPreference = "Stop"
+}
+else
+{
+    Write-Host "[i] Uninstalling packages is disabled. Check packages list carefully and create a empty 'C:\configs\enable-uninstallpackages.txt' to enable."
+}
+
 # refresh and generate report
 Write-Host "[*] Apply changes..."
 gpupdate.exe /force
 
 Write-Host "[*] Generate report in C:\Temp\GPReport.html"
-Remove-Item -Force \Temp\GPReport.html
+Remove-Item -Force -ErrorAction SilentlyContinue -Path \Temp\GPReport.html
 gpresult.exe /H \Temp\GPReport.html
