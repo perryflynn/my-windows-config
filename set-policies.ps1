@@ -1,3 +1,4 @@
+#Requires -Version 7
 # Disable annoying stuff in Windows 10 with group policies
 # by Christian Blechert <christian@serverless.industries>
 # 2021-07-18
@@ -310,15 +311,24 @@ $packages = @(
 
 if (Test-Path -Path "C:\configs\enable-uninstallpackages.txt" -PathType Leaf)
 {
-    $ErrorActionPreference = "Continue"
-
-    foreach($package in $packages)
-    {
-        Remove-AppXProvisionedPackageAndWait -Name $package
-        Remove-AppxPackageAndWait -Name $package
+    if ((Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\AppXSvc').Start -ne 2) {
+        Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\AppXSvc' -Name 'Start' -Value '2'
+        Write-Host "[*] Enable AppXSvc Service"
+        Write-Host "[!] You have to restart the computer to make uninstalling packages work!"
     }
+    else
+    {
+        Import-Module -usewindowspowershell AppX
+        $ErrorActionPreference = "Continue"
 
-    $ErrorActionPreference = "Stop"
+        foreach($package in $packages)
+        {
+            Remove-AppXProvisionedPackageAndWait -Name $package
+            Remove-AppxPackageAndWait -Name $package
+        }
+
+        $ErrorActionPreference = "Stop"
+    }
 }
 else
 {
