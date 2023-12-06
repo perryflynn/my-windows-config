@@ -1,5 +1,8 @@
 # my-windows-config
-Disable Cortana, forced updates and other annoying stuff
+
+Disable Cortana, forced updates, telemetry and other annoying stuff.
+
+Requires a Windows Edition which allows using the Group Policy Editor.
 
 ## Install
 
