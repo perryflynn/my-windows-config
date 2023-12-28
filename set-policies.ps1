@@ -229,6 +229,15 @@ Write-Host "[*] Disable OneDrive"
     New-Object psobject -Property @{ ValueName='DisableFileSyncNGSC'; Data = 1; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\OneDrive"
 
+# Disable PowerShell Telemetry
+# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.4
+Write-Host "[*] Disable PowerShell Telemetry"
+if ($null -eq $env:POWERSHELL_TELEMETRY_OPTOUT)
+{
+    $env:POWERSHELL_TELEMETRY_OPTOUT = "true"
+    [Environment]::SetEnvironmentVariable("POWERSHELL_TELEMETRY_OPTOUT", "true", "Machine")
+}
+
 # True reboot/shutdown
 if (Test-Path -Path "C:\configs\enable-trueshutdown-icon.txt" -PathType Leaf)
 {
