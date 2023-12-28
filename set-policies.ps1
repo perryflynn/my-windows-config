@@ -315,7 +315,9 @@ $packages = @(
     'windowsphone',
     'xbox',
     'zunemusic',
-    'zunevideo'
+    'zunevideo',
+    'xing',
+    'king.com'
 )
 
 if (Test-Path -Path "C:\configs\enable-uninstallpackages.txt" -PathType Leaf)
