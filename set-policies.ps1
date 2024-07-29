@@ -236,9 +236,15 @@ Write-Host "[*] Disable P2P Windows Update features"
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.OneDrive::PreventOnedriveFileSync
 Write-Host "[*] Disable OneDrive"
 @(
-    # Bypass P2P and use BITS service
     New-Object psobject -Property @{ ValueName='DisableFileSyncNGSC'; Data = 1; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\OneDrive"
+
+# Disable soft-disconnect from a network (wifi disconnect if no internet connection)
+# https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.OneDrive::PreventOnedriveFileSync
+Write-Host "[*] Disable soft-disconnect for Wifi connections"
+@(
+    New-Object psobject -Property @{ ValueName='fSoftDisconnectConnections'; Data = 0; Type = 'DWord' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WcmSvc\GroupPolicy"
 
 # Disable PowerShell Telemetry
 # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.4
