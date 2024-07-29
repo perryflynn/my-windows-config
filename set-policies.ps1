@@ -172,6 +172,17 @@ Write-Host "[*] Disable wake up system for windows updates"
     New-Object psobject -Property @{ ValueName='AUPowerManagement'; Data = 0; Type = 'DWord' }
 ) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate"
 
+# Disable Windows 11 Upgrade
+Write-Host "[*] Disable Upgrade to Windows 11"
+@(
+    # enforce specific target version
+    New-Object psobject -Property @{ ValueName='TargetReleaseVersion'; Data = 1; Type = 'DWord' }
+    # Windows Release
+    New-Object psobject -Property @{ ValueName='ProductVersion'; Data = "Windows 10"; Type = 'String' }
+    # Windows 10 Release
+    New-Object psobject -Property @{ ValueName='TargetReleaseVersionInfo'; Data = "22H2"; Type = 'String' }
+) | Set-PolicyFileEntry -Path $UserDir -Key "Software\Policies\Microsoft\Windows\WindowsUpdate"
+
 # Error Reporting
 # https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsErrorReporting::WerDisable_2
 Write-Host "[*] Disable error reporting"
