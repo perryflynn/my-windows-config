@@ -45,12 +45,15 @@ Feature Flags can be set by just creating empty text files in `C:\configs`:
 [i] 'Show logoninfo' is disabled. Create a empty 'C:\configs\enable-logoninfo.txt' to enable.
 [*] Disable automatic updates, show notifications on new updates
 [*] Disable wake up system for windows updates
+[*] Disable Upgrade to Windows 11
 [*] Disable error reporting
 [*] Disable consumer experience reporting
 [*] Disable application telemetry
 [*] Disable auto connect to suggested hotspots
 [*] Disable P2P Windows Update features
 [*] Disable OneDrive
+[*] Disable soft-disconnect for Wifi connections
+[*] Disable PowerShell Telemetry
 [*] Create shortcut for true reboot/shutdown on desktop
 [*] Uninstall package 'Microsoft.Windows.PeopleExperienceHost_10.0.19041.3636_neutral_neutral_cw5n1h2txyewy' on all accounts
 [*] Uninstall package 'Microsoft.XboxGameCallableUI_1000.19041.3636.0_neutral_neutral_cw5n1h2txyewy' on all accounts
